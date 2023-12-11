@@ -33,6 +33,7 @@ task_params = {'k_shot': args.k_shot,
                'n_query': args.n_query}
 # Load Data
 X_train_dataset, y_train_dataset = load_data(args.dataset)
+print(y_train_dataset)
 
 # ===== MODEL =====
 model = MAMLClassifier(n_way=task_params['n_way'])
@@ -73,7 +74,6 @@ for epoch in range(1, epochs+1):
             train_sample, test_sample = extract_sample(X_train_dataset, y_train_dataset, task_params)
             X_train = train_sample[0].to(device)
             y_train = train_sample[1].to(device)
-            print(y_train)
             X_val = test_sample[0].to(device)
             y_val = test_sample[1].to(device)
             
