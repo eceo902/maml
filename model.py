@@ -40,9 +40,13 @@ class MAMLClassifier(nn.Module):
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
+
+        print(x.shape)
         
         # Features of shape (batch_size, 64)
         feat = x.view(x.size(0), -1)
+
+        print(feat)
         
         # Output
         out = self.head(feat)
