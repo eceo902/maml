@@ -46,7 +46,7 @@ class MAMLClassifier(nn.Module):
         # Features of shape (batch_size, 64)
         feat = x.view(x.size(0), -1)
 
-        print(feat)
+        print("feat", feat.shape)
         
         # Output
         out = self.head(feat)
@@ -65,6 +65,8 @@ class MAMLClassifier(nn.Module):
         
         # Features of shape (batch_size, 64)   
         feat = x.view(x.size(0), -1)
+
+        print("feat", feat.shape)
         
         # Output
         out = F.linear(feat, params['head.weight'], params['head.bias'])
