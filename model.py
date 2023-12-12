@@ -27,10 +27,10 @@ class MAMLClassifier(nn.Module):
     def __init__(self, n_way):
         super(MAMLClassifier, self).__init__()
         
-        self.conv1 = conv_block(3, 32)
-        self.conv2 = conv_block(32, 32)
-        self.conv3 = conv_block(32, 32)
-        self.conv4 = conv_block(32, 32)
+        self.conv1 = conv_block(3, 64)
+        self.conv2 = conv_block(64, 64)
+        self.conv3 = conv_block(64, 64)
+        self.conv4 = conv_block(64, 64)
         
         self.head = nn.Linear(32, n_way)
         
@@ -44,10 +44,8 @@ class MAMLClassifier(nn.Module):
         print(x.shape)
         
         # Features of shape (batch_size, 64)
-        #x original shape = [5, 32, 2, 2]
-        # feat = x.view(x.size(0), -1)
-        #feat = x.view(x.size(1), -1)
-        feat = x[:, :, 0, 0]
+        feat = x.view(x.size(0), -1)
+
         print("feat", feat.shape)
         
         # Output
@@ -66,8 +64,7 @@ class MAMLClassifier(nn.Module):
                                       params[f'conv{block}.1.bias'])
         
         # Features of shape (batch_size, 64)   
-        # feat = x.view(x.size(0), -1)
-        feat = x
+        feat = x.view(x.size(0), -1)
 
         print("feat", feat.shape)
         
