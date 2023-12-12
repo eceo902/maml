@@ -98,11 +98,6 @@ def extract_sample(X_data, y_data, task_params):
     # Shuffle indices
     train_idx = np.random.permutation(len(X_train))
     test_idx = np.random.permutation(len(X_test))
-
-    print(X_train)
-    print(X_train.shape)
-    print(y_train)
-    print(y_train.shape)
     
     # Convert to tensor and permute the images as channels first and use the shuffle indices
     X_train = torch.Tensor(X_train).float().permute(0, 3, 1, 2)[train_idx]
@@ -153,17 +148,12 @@ def extract_sample_digit(X_data, y_data, task_params):
     # Shuffle indices
     train_idx = np.random.permutation(len(X_train))
     test_idx = np.random.permutation(len(X_test))
-
-    print(X_train)
-    print(X_train.shape)
-    print(y_train)
-    print(y_train.shape)
     
     # Convert to tensor and permute the images as channels first and use the shuffle indices
-    X_train = torch.Tensor(X_train).float().permute(0, 3, 1, 2)[train_idx]
+    X_train = torch.Tensor(X_train).float()[train_idx]
     y_train = torch.Tensor(y_train)[train_idx].long()
     
-    X_test = torch.Tensor(X_test).float().permute(0, 3, 1, 2)[test_idx]
+    X_test = torch.Tensor(X_test).float()[test_idx]
     y_test = torch.Tensor(y_test)[test_idx].long()
       
     return (X_train, y_train), (X_test, y_test)
