@@ -62,9 +62,6 @@ class MAMLClassifier(nn.Module):
         feat = x.view(x.size(0), -1)
         
         # Output
-        print("head weight = ", params['head.weight'].shape )
-        print("head bias = ", params['head.bias'].shape )
-        print("feat shape = ", feat.shape)
         out = F.linear(feat, params['head.weight'], params['head.bias'])
         
         return out
