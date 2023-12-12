@@ -46,7 +46,8 @@ class MAMLClassifier(nn.Module):
         # Features of shape (batch_size, 64)
         #x original shape = [5, 32, 2, 2]
         # feat = x.view(x.size(0), -1)
-        feat = x.view(x.size(1), -1)
+        #feat = x.view(x.size(1), -1)
+        feat = x[:, :, 0, 0]
         print("feat", feat.shape)
         
         # Output
