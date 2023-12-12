@@ -12,6 +12,10 @@ from dataset import load_data, extract_sample
 
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
+from torchvision import transforms as T
+
+
+torch.manual_seed(0)
 
 # ===== ARGUMENTS =====
 parser = argparse.ArgumentParser()
@@ -60,6 +64,11 @@ optimizer = torch.optim.Adam(model.parameters(), lr=beta)
 # Mount model to device
 model.to(device)
 
+
+digit_dataset = ImageFolder('digits/train/', transform=T.ToTensor())
+digit_loader = DataLoader(digit_dataset, batch_size=len(digit_dataset))
+
+
 # Start Meta-Training
 for epoch in range(1, epochs+1):
     
@@ -67,32 +76,48 @@ for epoch in range(1, epochs+1):
     
     # Meta Episode
     for episode in range(num_episodes):
-        
         task_losses = []
         task_accuracies = []
-
-        # train_dataset = ImageFolder('digits/train/', transform=T.ToTensor())
-        # train_loader = DataLoader(train_dataset, batch_size=len(train_dataset))
-        # for X_train, y_train in train_loader:
-        #     X_train, y_train = X_train.to(device), y_train.to(device)
-
-        #     for step in range(train_steps):
-        #         # Forward pass
-        #         logits = model(X_train)
-        #         # Loss
-        #         loss = criterion(logits, y_train)
-        #         # Backprop and Optimize
-        #         loss.backward()
-        #         optimizer.step()
-
-        # # Get Trained Loss and Accuracy
-        # logits = model(X_train)
-        # loss = criterion(logits, y_train)
-        # accuracy = torch.eq(logits.argmax(dim=-1), y_train).sum().item() / logits.shape[0]
         
-
         # Task Fine-tuning
         for task_idx in range(batch_size):
+            # Should only run once since digit_loader has batch_size of len(digit_dataset)
+            for digit_X_train, digit_y_train in digit_loader:
+                train_sample, test_sample = extract_sample(digit_X_train, digit_y_train, task_params)
+                X_train = train_sample[0].to(device)
+                y_train = train_sample[1].to(device)
+                X_val = test_sample[0].to(device)
+                y_val = test_sample[1].to(device)
+
+                # Create a fast model using current meta model weights
+                fast_weights = OrderedDict(model.named_parameters())
+
+                for step in range(inner_train_steps):
+                    # Forward pass
+                    logits = model.functional_forward(X_train, fast_weights)
+                    # Loss
+                    loss = criterion(logits, y_train)
+                    # Compute Gradients
+                    gradients = torch.autograd.grad(loss, fast_weights.values(), create_graph=True)
+                    # Manual Gradient Descent on the fast weights
+                    fast_weights = OrderedDict(
+                                        (name, param - alpha * grad)
+                                        for ((name, param), grad) in zip(fast_weights.items(), gradients)
+                                    )
+
+                # Testing on the Query Set (Val)
+                val_logits = model.functional_forward(X_val, fast_weights)
+                val_loss = criterion(val_logits, y_val)
+                
+                # Calculating accuracy
+                y_pred = val_logits.softmax(dim=1)
+                accuracy = torch.eq(y_pred.argmax(dim=-1), y_val).sum().item() / y_pred.shape[0]
+                
+                task_accuracies.append(accuracy)
+                # Here we append negative loss value because we want to perform poorly on digit dataset
+                task_losses.append(-val_loss)
+
+
             # Get the train and val splits
             train_sample, test_sample = extract_sample(X_train_dataset, y_train_dataset, task_params)
             X_train = train_sample[0].to(device)
