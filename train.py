@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms as T
 
 
-torch.manual_seed(0)
+# torch.manual_seed(0)
 
 # ===== ARGUMENTS =====
 parser = argparse.ArgumentParser()
