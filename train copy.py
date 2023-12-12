@@ -8,7 +8,7 @@ from torch import nn
 import torch.nn.functional as F
 
 from model import MAMLClassifier
-from dataset import load_data, extract_sample, extract_sample_digit
+from dataset import load_data, extract_sample
 
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
