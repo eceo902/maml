@@ -67,7 +67,7 @@ model.to(device)
 
 
 digit_dataset = ImageFolder('digits/train/', transform=T.ToTensor())
-digit_loader = DataLoader(digit_dataset, batch_size=len(digit_dataset))
+digit_loader = DataLoader(digit_dataset, batch_size=len(digit_dataset), shuffle=True)
 
 
 # Start Meta-Training
@@ -83,12 +83,14 @@ for epoch in range(1, epochs+1):
         # Task Fine-tuning
         for task_idx in range(batch_size):
             # Should only run once since digit_loader has batch_size of len(digit_dataset)
-            for digit_X_train, digit_y_train in digit_loader:
-                train_sample, test_sample = extract_sample_digit(digit_X_train, digit_y_train, task_params)
-                X_train = train_sample[0].to(device)
-                y_train = train_sample[1].to(device)
-                X_val = test_sample[0].to(device)
-                y_val = test_sample[1].to(device)
+            for X_train_and_val, y_train_and_val in digit_loader:
+                X_train, y_train = X_train_and_val[:15].to(device), y_train_and_val[:15].to(device)
+                X_val, y_val = X_train_and_val[15:].to(device), y_train_and_val[15:].to(device)
+                # train_sample, test_sample = extract_sample_digit(digit_X_train, digit_y_train, task_params)
+                # X_train = train_sample[0].to(device)
+                # y_train = train_sample[1].to(device)
+                # X_val = test_sample[0].to(device)
+                # y_val = test_sample[1].to(device)
 
                 # Create a fast model using current meta model weights
                 fast_weights = OrderedDict(model.named_parameters())

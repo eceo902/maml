@@ -66,7 +66,7 @@ def extract_sample(X_data, y_data, task_params):
         y_data (ndarray): labels
         task_params (dict): task parameters dictionary containing k_shot, n_way and n_query
     Returns:
-        (tuple): of train and test samples 
+        (tuple): of train and test samples
     '''
     k_shot = task_params['k_shot']
     n_way = task_params['n_way']
