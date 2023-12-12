@@ -98,6 +98,66 @@ def extract_sample(X_data, y_data, task_params):
     # Shuffle indices
     train_idx = np.random.permutation(len(X_train))
     test_idx = np.random.permutation(len(X_test))
+
+    print(X_train)
+    print(X_train.shape)
+    print(y_train)
+    print(y_train.shape)
+    
+    # Convert to tensor and permute the images as channels first and use the shuffle indices
+    X_train = torch.Tensor(X_train).float().permute(0, 3, 1, 2)[train_idx]
+    y_train = torch.Tensor(y_train)[train_idx].long()
+    
+    X_test = torch.Tensor(X_test).float().permute(0, 3, 1, 2)[test_idx]
+    y_test = torch.Tensor(y_test)[test_idx].long()
+      
+    return (X_train, y_train), (X_test, y_test)
+
+def extract_sample_digit(X_data, y_data, task_params):
+    '''
+    Extract a random sample as a k-shot n-way task
+    Args:
+        X_data (ndarray): images
+        y_data (ndarray): labels
+        task_params (dict): task parameters dictionary containing k_shot, n_way and n_query
+    Returns:
+        (tuple): of train and test samples 
+    '''
+    k_shot = task_params['k_shot']
+    n_way = task_params['n_way']
+    n_query = task_params['n_query']
+    
+    X_train = []
+    y_train = []
+    
+    X_test = []
+    y_test = []
+    
+    # Randomly select n_way classes
+    sampled_cls = np.random.choice(np.unique(y_data), n_way, replace=False)
+        
+    for i, c in enumerate(sampled_cls):
+        # Select images belonging to that class
+        X_data_c = X_data[y_data == c]
+        
+        # Sample k_shot+n_query images
+        sample_images = np.random.permutation(X_data_c)[:(k_shot+n_query)]
+        
+        # Add to lists
+        X_train.extend(sample_images[:k_shot])
+        X_test.extend(sample_images[k_shot:])
+        
+        y_train.extend([i] * k_shot)
+        y_test.extend([i] * n_query)
+    
+    # Shuffle indices
+    train_idx = np.random.permutation(len(X_train))
+    test_idx = np.random.permutation(len(X_test))
+
+    print(X_train)
+    print(X_train.shape)
+    print(y_train)
+    print(y_train.shape)
     
     # Convert to tensor and permute the images as channels first and use the shuffle indices
     X_train = torch.Tensor(X_train).float().permute(0, 3, 1, 2)[train_idx]
