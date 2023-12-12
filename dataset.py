@@ -3,6 +3,7 @@ import numpy as np
 import os
 from tqdm import tqdm
 import cv2
+from torch.utils.data import Dataset
 
 def load_characters(root, alphabet):
     '''
@@ -108,52 +109,17 @@ def extract_sample(X_data, y_data, task_params):
       
     return (X_train, y_train), (X_test, y_test)
 
-def extract_sample_digit(X_data, y_data, task_params):
-    '''
-    Extract a random sample as a k-shot n-way task
-    Args:
-        X_data (ndarray): images
-        y_data (ndarray): labels
-        task_params (dict): task parameters dictionary containing k_shot, n_way and n_query
-    Returns:
-        (tuple): of train and test samples 
-    '''
-    k_shot = task_params['k_shot']
-    n_way = task_params['n_way']
-    n_query = task_params['n_query']
-    
-    X_train = []
-    y_train = []
-    
-    X_test = []
-    y_test = []
-    
-    # Randomly select n_way classes
-    sampled_cls = np.random.choice(np.unique(y_data), n_way, replace=False)
-        
-    for i, c in enumerate(sampled_cls):
-        # Select images belonging to that class
-        X_data_c = X_data[y_data == c]
-        
-        # Sample k_shot+n_query images
-        sample_images = np.random.permutation(X_data_c)[:(k_shot+n_query)]
-        
-        # Add to lists
-        X_train.extend(sample_images[:k_shot])
-        X_test.extend(sample_images[k_shot:])
-        
-        y_train.extend([i] * k_shot)
-        y_test.extend([i] * n_query)
-    
-    # Shuffle indices
-    train_idx = np.random.permutation(len(X_train))
-    test_idx = np.random.permutation(len(X_test))
-    
-    # Convert to tensor and permute the images as channels first and use the shuffle indices
-    X_train = torch.Tensor(X_train).float()[train_idx]
-    y_train = torch.Tensor(y_train)[train_idx].long()
-    
-    X_test = torch.Tensor(X_test).float()[test_idx]
-    y_test = torch.Tensor(y_test)[test_idx].long()
-      
-    return (X_train, y_train), (X_test, y_test)
+class CustomDataset(Dataset):
+    def __init__(self, original_dataset, label_map):
+        self.original_dataset = original_dataset
+        self.label_map = label_map
+
+    def __len__(self):
+        return len(self.original_dataset)
+
+    def __getitem__(self, idx):
+        data, label = self.original_dataset[idx]
+        # Map the label if necessary
+        if label in self.label_map:
+            label = self.label_map[label]
+        return data, label
