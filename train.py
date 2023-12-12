@@ -123,7 +123,6 @@ for epoch in range(1, epochs+1):
 
             # Get the train and val splits
             train_sample, test_sample = extract_sample(X_train_dataset, y_train_dataset, task_params)
-            print(train_sample, test_sample)
             X_train = train_sample[0].to(device)
             y_train = train_sample[1].to(device)
             X_val = test_sample[0].to(device)
