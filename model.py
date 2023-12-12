@@ -40,17 +40,12 @@ class MAMLClassifier(nn.Module):
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
-
-        print(x.shape)
         
         # Features of shape (batch_size, 64)
         feat = x.view(x.size(0), -1)
-
-        print("feat", feat.shape)
         
         # Output
         out = self.head(feat)
-        
         return out
     
     def functional_forward(self, x, params):
@@ -65,8 +60,6 @@ class MAMLClassifier(nn.Module):
         
         # Features of shape (batch_size, 64)   
         feat = x.view(x.size(0), -1)
-
-        print("feat", feat.shape)
         
         # Output
         print("head weight = ", params['head.weight'].shape )
