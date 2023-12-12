@@ -89,7 +89,7 @@ for episode in range(num_episodes):
         test_good_half_loader = get_loader(test_good_half, 10)
 
         # Should only run once since digit_loader has batch_size of len(digit_dataset)
-        for X_train_and_val, y_train_and_val in train_good_half_loader:
+        for X_train_and_val, y_train_and_val in test_good_half_loader:
             X_train, y_train = X_train_and_val[:5].to(device), y_train_and_val[:5].to(device)
             X_val, y_val = X_train_and_val[5:].to(device), y_train_and_val[5:].to(device)
 
@@ -118,44 +118,8 @@ for episode in range(num_episodes):
             accuracy = torch.eq(y_pred.argmax(dim=-1), y_val).sum().item() / y_pred.shape[0]
             
             task_accuracies.append(accuracy)
-            # Here we append negative loss value because we want to perform poorly on digit dataset
+            overall_accuracies.append(accuracy)
             task_losses.append(val_loss)
-
-        # Get the train and val splits
-        train_sample, test_sample = extract_sample(X_test_dataset, y_test_dataset, task_params)
-        X_train = train_sample[0].to(device)
-        y_train = train_sample[1].to(device)
-        X_val = test_sample[0].to(device)
-        y_val = test_sample[1].to(device)
-
-        # Create a fast model using current meta model weights
-        fast_weights = OrderedDict(model.named_parameters())
-
-        # Fine-tune
-        for step in range(inner_train_steps):
-            # Forward pass
-            logits = model.functional_forward(X_train, fast_weights)
-            # Loss
-            loss = criterion(logits, y_train)
-            # Compute Gradients
-            gradients = torch.autograd.grad(loss, fast_weights.values(), create_graph=True)
-            # Manual Gradient Descent on the fast weights
-            fast_weights = OrderedDict(
-                                (name, param - alpha * grad)
-                                for ((name, param), grad) in zip(fast_weights.items(), gradients)
-                            )
-
-        # Testing on the Query Set (Val)
-        val_logits = model.functional_forward(X_val, fast_weights)
-        val_loss = criterion(val_logits, y_val)
-
-        # Calculating accuracy
-        y_pred = val_logits.softmax(dim=1)
-        accuracy = torch.eq(y_pred.argmax(dim=-1), y_val).sum().item() / y_pred.shape[0]
-
-        task_accuracies.append(accuracy)
-        overall_accuracies.append(accuracy)
-        task_losses.append(val_loss)
 
     # Meta Loss and Accuracy
     meta_batch_loss = torch.stack(task_losses).mean()
