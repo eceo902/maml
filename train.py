@@ -40,6 +40,7 @@ task_params = {'k_shot': args.k_shot,
                'n_query': args.n_query}
 # Load Data
 X_train_dataset, y_train_dataset = load_data(args.dataset)
+print(X_train_dataset)
 print(y_train_dataset)
 
 # ===== MODEL =====
