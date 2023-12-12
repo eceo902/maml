@@ -8,7 +8,7 @@ from torch import nn
 import torch.nn.functional as F
 
 from model import MAMLClassifier
-from dataset import load_data, extract_sample
+from dataset import load_data, extract_sample, extract_sample_digit
 
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
@@ -84,7 +84,7 @@ for epoch in range(1, epochs+1):
         for task_idx in range(batch_size):
             # Should only run once since digit_loader has batch_size of len(digit_dataset)
             for digit_X_train, digit_y_train in digit_loader:
-                train_sample, test_sample = extract_sample(digit_X_train, digit_y_train, task_params)
+                train_sample, test_sample = extract_sample_digit(digit_X_train, digit_y_train, task_params)
                 X_train = train_sample[0].to(device)
                 y_train = train_sample[1].to(device)
                 X_val = test_sample[0].to(device)
