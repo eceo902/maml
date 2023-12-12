@@ -32,7 +32,7 @@ class MAMLClassifier(nn.Module):
         self.conv3 = conv_block(64, 64)
         self.conv4 = conv_block(64, 64)
         
-        self.head = nn.Linear(256, n_way)
+        self.head = nn.Linear(64, n_way)
         
     def forward(self, x):
         
@@ -63,5 +63,4 @@ class MAMLClassifier(nn.Module):
         
         # Output
         out = F.linear(feat, params['head.weight'], params['head.bias'])
-        
         return out

@@ -32,10 +32,12 @@ checkpoint = torch.load(args.ckpt)
 
 # ===== DATA =====
 task_params = checkpoint['task_params']
+
 # Load Data
 # X_test_dataset, y_test_dataset = load_data(args.dataset)
 transform = T.Compose(
     [T.ToTensor(),
+     T.Resize(28),
      T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
 temp_dataset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
