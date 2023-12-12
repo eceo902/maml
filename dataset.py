@@ -3,7 +3,8 @@ import numpy as np
 import os
 from tqdm import tqdm
 import cv2
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset, Subset, SubsetRandomSampler
+
 
 def load_characters(root, alphabet):
     '''
@@ -123,3 +124,10 @@ class CustomDataset(Dataset):
         if label in self.label_map:
             label = self.label_map[label]
         return data, label
+    
+def get_loader(dataset, num_samples):
+    indices = np.arange(len(dataset))
+    np.random.shuffle(indices)
+    sampled_indices = indices[:num_samples]
+    sampler = SubsetRandomSampler(sampled_indices)
+    return DataLoader(dataset, batch_size=num_samples, sampler=sampler)

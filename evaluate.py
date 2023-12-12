@@ -8,7 +8,10 @@ from torch import nn
 import torch.nn.functional as F
 
 from model import MAMLClassifier
-from dataset import load_data, extract_sample
+from dataset import load_data, extract_sample, CustomDataset
+from torch.utils.data import Subset
+from torchvision import transforms as T
+import torchvision
 
 torch.manual_seed(1)
 
@@ -30,7 +33,28 @@ checkpoint = torch.load(args.ckpt)
 # ===== DATA =====
 task_params = checkpoint['task_params']
 # Load Data
-X_test_dataset, y_test_dataset = load_data(args.dataset)
+# X_test_dataset, y_test_dataset = load_data(args.dataset)
+transform = T.Compose(
+    [T.ToTensor(),
+     T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+train_dataset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+
+def split_dataset_by_classes(dataset, class_range):
+    indices = [i for i, (_, target) in enumerate(dataset) if target in class_range]
+    return Subset(dataset, indices)
+
+# Define class ranges for splitting
+good_half_classes = list(range(0, 5))   # Classes 0-4
+bad_half_classes = list(range(5, 10))  # Classes 5-9
+
+# Split train dataset
+train_good_half = split_dataset_by_classes(train_dataset, good_half_classes)
+train_bad_half = split_dataset_by_classes(train_dataset, bad_half_classes)
+
+label_map = {5: 0, 6: 1, 7: 2, 8: 3, 9: 4}
+train_bad_half = CustomDataset(train_bad_half, label_map)
+
 
 # ===== MODEL =====
 model = MAMLClassifier(n_way=task_params['n_way'])

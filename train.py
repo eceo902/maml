@@ -8,10 +8,10 @@ from torch import nn
 import torch.nn.functional as F
 
 from model import MAMLClassifier
-from dataset import load_data, extract_sample, CustomDataset
+from dataset import load_data, extract_sample, CustomDataset, get_loader
 
 from torchvision.datasets import ImageFolder
-from torch.utils.data import DataLoader, Subset, Dataset, SubsetRandomSampler
+from torch.utils.data import Subset
 from torchvision import transforms as T
 import torchvision
 
@@ -91,14 +91,6 @@ train_bad_half = CustomDataset(train_bad_half, label_map)
 # Train loaders
 # train_loader_good_half = DataLoader(train_good_half, batch_size=batch_size, shuffle=False)
 # train_loader_bad_half = DataLoader(train_bad_half, batch_size=batch_size, shuffle=False)
-
-
-def get_loader(dataset, num_samples):
-    indices = np.arange(len(dataset))
-    np.random.shuffle(indices)
-    sampled_indices = indices[:num_samples]
-    sampler = SubsetRandomSampler(sampled_indices)
-    return DataLoader(dataset, batch_size=num_samples, sampler=sampler)
 
 
 # Start Meta-Training
