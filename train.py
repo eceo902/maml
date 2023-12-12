@@ -118,7 +118,7 @@ for epoch in range(1, epochs+1):
                 
                 task_accuracies.append(accuracy)
                 # Here we append negative loss value because we want to perform poorly on digit dataset
-                task_losses.append(-val_loss)
+                task_losses.append(-val_loss * 0.1)
 
 
             # Get the train and val splits
