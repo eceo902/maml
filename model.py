@@ -28,11 +28,11 @@ class MAMLClassifier(nn.Module):
         super(MAMLClassifier, self).__init__()
         
         self.conv1 = conv_block(3, 32)
-        self.conv2 = conv_block(32, 64)
-        self.conv3 = conv_block(64, 128)
-        self.conv4 = conv_block(128, 256)
+        self.conv2 = conv_block(32, 32)
+        self.conv3 = conv_block(32, 32)
+        self.conv4 = conv_block(32, 32)
         
-        self.head = nn.Linear(256, n_way)
+        self.head = nn.Linear(32, n_way)
         
     def forward(self, x):
         
