@@ -8,7 +8,7 @@ from torch import nn
 import torch.nn.functional as F
 
 from model import MAMLClassifier
-from dataset import load_data, extract_sample, CustomDataset
+from dataset import load_data, extract_sample, CustomDataset, get_loader
 from torch.utils.data import Subset
 from torchvision import transforms as T
 import torchvision
@@ -38,7 +38,10 @@ transform = T.Compose(
     [T.ToTensor(),
      T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-train_dataset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+temp_dataset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+total_size = len(temp_dataset)
+split_size = total_size // 2
+fine_tune_dataset, test_dataset = torch.utils.data.random_split(temp_dataset, [split_size, total_size - split_size])
 
 def split_dataset_by_classes(dataset, class_range):
     indices = [i for i, (_, target) in enumerate(dataset) if target in class_range]
@@ -48,12 +51,8 @@ def split_dataset_by_classes(dataset, class_range):
 good_half_classes = list(range(0, 5))   # Classes 0-4
 bad_half_classes = list(range(5, 10))  # Classes 5-9
 
-# Split train dataset
-train_good_half = split_dataset_by_classes(train_dataset, good_half_classes)
-train_bad_half = split_dataset_by_classes(train_dataset, bad_half_classes)
-
-label_map = {5: 0, 6: 1, 7: 2, 8: 3, 9: 4}
-train_bad_half = CustomDataset(train_bad_half, label_map)
+# Split test dataset
+test_good_half = split_dataset_by_classes(test_dataset, good_half_classes)
 
 
 # ===== MODEL =====
@@ -87,6 +86,41 @@ for episode in range(num_episodes):
 
     # Task Fine-tuning
     for task_idx in range(batch_size):
+        test_good_half_loader = get_loader(test_good_half, 10)
+
+        # Should only run once since digit_loader has batch_size of len(digit_dataset)
+        for X_train_and_val, y_train_and_val in train_good_half_loader:
+            X_train, y_train = X_train_and_val[:5].to(device), y_train_and_val[:5].to(device)
+            X_val, y_val = X_train_and_val[5:].to(device), y_train_and_val[5:].to(device)
+
+            # Create a fast model using current meta model weights
+            fast_weights = OrderedDict(model.named_parameters())
+
+            for step in range(inner_train_steps):
+                # Forward pass
+                logits = model.functional_forward(X_train, fast_weights)
+                # Loss
+                loss = criterion(logits, y_train)
+                # Compute Gradients
+                gradients = torch.autograd.grad(loss, fast_weights.values(), create_graph=True)
+                # Manual Gradient Descent on the fast weights
+                fast_weights = OrderedDict(
+                                    (name, param - alpha * grad)
+                                    for ((name, param), grad) in zip(fast_weights.items(), gradients)
+                                )
+
+            # Testing on the Query Set (Val)
+            val_logits = model.functional_forward(X_val, fast_weights)
+            val_loss = criterion(val_logits, y_val)
+            
+            # Calculating accuracy
+            y_pred = val_logits.softmax(dim=1)
+            accuracy = torch.eq(y_pred.argmax(dim=-1), y_val).sum().item() / y_pred.shape[0]
+            
+            task_accuracies.append(accuracy)
+            # Here we append negative loss value because we want to perform poorly on digit dataset
+            task_losses.append(val_loss)
+
         # Get the train and val splits
         train_sample, test_sample = extract_sample(X_test_dataset, y_test_dataset, task_params)
         X_train = train_sample[0].to(device)

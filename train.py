@@ -110,7 +110,9 @@ for epoch in range(1, epochs+1):
             # Should only run once since digit_loader has batch_size of len(digit_dataset)
             for X_train_and_val, y_train_and_val in train_good_half_loader:
                 X_train, y_train = X_train_and_val[:5].to(device), y_train_and_val[:5].to(device)
+                print(X_train.shape, y_train.shape)
                 X_val, y_val = X_train_and_val[5:].to(device), y_train_and_val[5:].to(device)
+                print(X_val.shape, y_val.shape)
 
                 # Create a fast model using current meta model weights
                 fast_weights = OrderedDict(model.named_parameters())
