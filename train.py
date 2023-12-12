@@ -10,6 +10,9 @@ import torch.nn.functional as F
 from model import MAMLClassifier
 from dataset import load_data, extract_sample
 
+from torchvision.datasets import ImageFolder
+from torch.utils.data import DataLoader
+
 # ===== ARGUMENTS =====
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default='omniglot/images_background', type=str, help='Path to images_background')
@@ -67,7 +70,27 @@ for epoch in range(1, epochs+1):
         
         task_losses = []
         task_accuracies = []
+
+        # train_dataset = ImageFolder('digits/train/', transform=T.ToTensor())
+        # train_loader = DataLoader(train_dataset, batch_size=len(train_dataset))
+        # for X_train, y_train in train_loader:
+        #     X_train, y_train = X_train.to(device), y_train.to(device)
+
+        #     for step in range(train_steps):
+        #         # Forward pass
+        #         logits = model(X_train)
+        #         # Loss
+        #         loss = criterion(logits, y_train)
+        #         # Backprop and Optimize
+        #         loss.backward()
+        #         optimizer.step()
+
+        # # Get Trained Loss and Accuracy
+        # logits = model(X_train)
+        # loss = criterion(logits, y_train)
+        # accuracy = torch.eq(logits.argmax(dim=-1), y_train).sum().item() / logits.shape[0]
         
+
         # Task Fine-tuning
         for task_idx in range(batch_size):
             # Get the train and val splits
@@ -109,7 +132,7 @@ for epoch in range(1, epochs+1):
         model.train()
         optimizer.zero_grad()
         # Meta Loss
-        meta_batch_loss = -torch.stack(task_losses).mean()
+        meta_batch_loss = torch.stack(task_losses).mean()
         # Meta backpropagation
         meta_batch_loss.backward()
         # Meta Optimization
