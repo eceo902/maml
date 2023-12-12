@@ -109,7 +109,7 @@ for epoch in range(1, epochs+1):
         model.train()
         optimizer.zero_grad()
         # Meta Loss
-        meta_batch_loss = torch.stack(task_losses).mean()
+        meta_batch_loss = -torch.stack(task_losses).mean()
         # Meta backpropagation
         meta_batch_loss.backward()
         # Meta Optimization
