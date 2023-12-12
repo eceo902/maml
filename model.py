@@ -44,7 +44,8 @@ class MAMLClassifier(nn.Module):
         print(x.shape)
         
         # Features of shape (batch_size, 64)
-        feat = x.view(x.size(0), -1)
+        # feat = x.view(x.size(0), -1)
+        feat = x
 
         print("feat", feat.shape)
         
@@ -64,7 +65,8 @@ class MAMLClassifier(nn.Module):
                                       params[f'conv{block}.1.bias'])
         
         # Features of shape (batch_size, 64)   
-        feat = x.view(x.size(0), -1)
+        # feat = x.view(x.size(0), -1)
+        feat = x
 
         print("feat", feat.shape)
         
