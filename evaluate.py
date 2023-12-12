@@ -10,6 +10,8 @@ import torch.nn.functional as F
 from model import MAMLClassifier
 from dataset import load_data, extract_sample
 
+torch.manual_seed(1)
+
 # ===== ARGUMENTS =====
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default='omniglot/images_evaluation', type=str, help='Path to images_evaluation')
