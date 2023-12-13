@@ -13,7 +13,6 @@ from torch.utils.data import Subset
 from torchvision import transforms as T
 import torchvision
 
-torch.manual_seed(0)
 
 # ===== ARGUMENTS =====
 parser = argparse.ArgumentParser()
@@ -23,9 +22,15 @@ parser.add_argument('--batch_size', default=32, type=int, help='No. of task samp
 parser.add_argument('--num_episodes', default=100, type=int, help='No. of episodes per epoch')
 parser.add_argument('--inner_train_steps', default=1, type=int, help='No. of fine-tuning gradient updates')
 parser.add_argument('--inner_lr', default=0.4, type=float, help='Task fine-tuning learning rate')
+parser.add_argument('--torch_seed', default=None, type=int, help='The torch manual_seed to use')
 parser.add_argument('--gpu', action="store_true", default=False, help='Flag to enable gpu usage')
 
 args = parser.parse_args()
+
+
+torch_seed = args.torch_seed
+if torch_seed is not None:
+    torch.manual_seed(torch_seed)
 
 # Load Checkpoint
 checkpoint = torch.load(args.ckpt)
