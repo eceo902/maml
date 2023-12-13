@@ -16,7 +16,7 @@ from torchvision import transforms as T
 import torchvision
 
 
-torch.manual_seed(1)
+torch.manual_seed(0)
 
 # ===== ARGUMENTS =====
 parser = argparse.ArgumentParser()
