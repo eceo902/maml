@@ -142,7 +142,7 @@ for epoch in range(1, epochs+1):
                 accuracy = torch.eq(y_pred.argmax(dim=-1), y_val).sum().item() / y_pred.shape[0]
                 
                 task_accuracies.append(accuracy)
-                # Here we append negative loss value because we want to perform poorly on digit dataset
+                # Append normal loss since we want to perform well on good dataset
                 task_losses.append(val_loss)
 
 
@@ -178,8 +178,8 @@ for epoch in range(1, epochs+1):
                 accuracy = torch.eq(y_pred.argmax(dim=-1), y_val).sum().item() / y_pred.shape[0]
                 
                 task_accuracies.append(accuracy)
-                # Here we append negative loss value because we want to perform poorly on digit dataset
-                task_losses.append(-val_loss * 0.25)
+                # Here we append negative loss value because we want to perform poorly on bad dataset
+                task_losses.append(-val_loss * 0.1)
         
         # Meta Update
         model.train()
