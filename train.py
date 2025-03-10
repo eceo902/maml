@@ -179,7 +179,7 @@ for epoch in range(1, epochs+1):
                 
                 task_accuracies.append(accuracy)
                 # Here we append negative loss value because we want to perform poorly on digit dataset
-                task_losses.append(-val_loss * 0.1)
+                task_losses.append(-val_loss * 0.25)
         
         # Meta Update
         model.train()
@@ -201,5 +201,6 @@ for epoch in range(1, epochs+1):
     pbar.close()
 
 # Save Model
+print(f"Saving model to {args.ckpt}")
 torch.save({'weights': model.state_dict(),
             'task_params': task_params}, args.ckpt)
