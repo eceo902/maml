@@ -32,7 +32,7 @@ class MAMLClassifier(nn.Module):
         self.conv3 = conv_block(64, 64)
         self.conv4 = conv_block(64, 64)
         
-        self.head = nn.Linear(64*2*2, n_way)
+        self.head = nn.Linear(64, n_way)
         
     def forward(self, x):
         
@@ -41,7 +41,10 @@ class MAMLClassifier(nn.Module):
         x = self.conv3(x)
         x = self.conv4(x)
         
-        # Features of shape (batch_size, 64*2*2) for 32x32 input
+        # Add global average pooling to reduce from 2x2 to 1x1
+        x = F.adaptive_avg_pool2d(x, 1)
+        
+        # Features now of shape (batch_size, 64) for 32x32 input after global pooling
         feat = x.view(x.size(0), -1)
         
         # Output
@@ -58,7 +61,10 @@ class MAMLClassifier(nn.Module):
                                       params[f'conv{block}.1.weight'],
                                       params[f'conv{block}.1.bias'])
         
-        # Features of shape (batch_size, 64*2*2) for 32x32 input
+        # Add global average pooling to reduce from 2x2 to 1x1
+        x = F.adaptive_avg_pool2d(x, 1)
+        
+        # Features now of shape (batch_size, 64) for 32x32 input after global pooling
         feat = x.view(x.size(0), -1)
         
         # Output
