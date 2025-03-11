@@ -73,7 +73,6 @@ model.to(device)
 
 transform = T.Compose(
     [T.ToTensor(),
-     T.Resize(28),
      T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
 train_dataset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
