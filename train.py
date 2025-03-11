@@ -179,7 +179,7 @@ for epoch in range(1, epochs+1):
                 
                 task_accuracies.append(accuracy)
                 # Here we append negative loss value because we want to perform poorly on bad dataset
-                task_losses.append(-val_loss * 0.1)
+                task_losses.append(val_loss)
         
         # Meta Update
         model.train()
